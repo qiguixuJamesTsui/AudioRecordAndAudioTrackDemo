@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">AudioRecordDemo</string>
+    <string name="app_name">Audio@JT</string>
     <string name="record_title">录音测试</string>
     <string name="play_title">播放测试</string>
     <string name="speaker_title">扬声器测试</string>
