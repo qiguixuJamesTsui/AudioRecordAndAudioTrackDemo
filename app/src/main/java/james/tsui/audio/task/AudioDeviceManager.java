@@ -72,8 +72,6 @@ public class AudioDeviceManager {
         }
     }
 
-    ;
-
     private static class AudioRecordingCallbackImpl extends AudioManager.AudioRecordingCallback {
         @Override
         public void onRecordingConfigChanged(List<AudioRecordingConfiguration> configs) {
