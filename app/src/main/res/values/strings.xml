@@ -11,13 +11,16 @@
     <string name="play_content_type">content:</string>
     <string name="rec_capture">内外</string>
     <string name="rec_start">录音</string>
-    <string name="rec_stop">停止</string>
+    <string name="rec_pre_dev">偏好设备</string>
     <string name="play_sample">样音/录音</string>
     <string name="play_usage">usage/stream</string>
     <string name="play_cycle">循环/顺序</string>
     <string name="play_start">播放</string>
-    <string name="play_stop">停止</string>
+    <string name="play_pre_dev">偏好设备</string>
     <string name="audio_mode">音频模式:</string>
-    <string name="set_mode">模式</string>
+    <string name="dev_list">可用设备:</string>
+    <string name="set_mode">切模</string>
     <string name="set_speaker_on"> spk </string>
+    <string name="set_sco_on"> sco </string>
+    <string name="btn_update_dev">设备刷新</string>
 </resources>

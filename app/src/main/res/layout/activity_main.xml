@@ -112,10 +112,10 @@
                         android:text="@string/rec_start" />
 
                     <Button
-                        android:id="@+id/btn_rec_stop"
-                        android:layout_width="80dp"
+                        android:id="@+id/btn_rec_dev"
+                        android:layout_width="210dp"
                         android:layout_height="wrap_content"
-                        android:text="@string/rec_stop" />
+                        android:text="@string/rec_pre_dev" />
                 </LinearLayout>
 
                 <TextView
@@ -249,10 +249,10 @@
                         android:text="@string/play_start" />
 
                     <Button
-                        android:id="@+id/btn_play_stop"
-                        android:layout_width="80dp"
+                        android:id="@+id/btn_play_dev"
+                        android:layout_width="210dp"
                         android:layout_height="wrap_content"
-                        android:text="@string/play_stop" />
+                        android:text="@string/play_pre_dev" />
                 </LinearLayout>
 
                 <TextView
@@ -282,6 +282,23 @@
 
                 <LinearLayout
                     android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:text="@string/dev_list" />
+
+                    <Spinner
+                        android:id="@+id/spn_dev_available"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="8dp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center_horizontal"
                     android:orientation="horizontal">
@@ -297,6 +314,18 @@
                         android:layout_width="80dp"
                         android:layout_height="wrap_content"
                         android:text="@string/set_speaker_on" />
+
+                    <Button
+                        android:id="@+id/btn_sco"
+                        android:layout_width="80dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/set_sco_on" />
+
+                    <Button
+                        android:id="@+id/btn_update_dev"
+                        android:layout_width="80dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/btn_update_dev" />
                 </LinearLayout>
 
                 <TextView

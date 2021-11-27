@@ -1,6 +1,7 @@
 package james.tsui.audio.task;
 
 import android.media.AudioAttributes;
+import android.media.AudioDeviceInfo;
 import android.media.AudioFormat;
 import android.media.AudioTrack;
 import android.os.AsyncTask;
@@ -15,9 +16,12 @@ import james.tsui.audio.utils.ContextUtils;
 
 public class AudioTrackTask extends AsyncTask<AudioTrackTask.Parameters, Integer, Long> {
     private static final String TAG = AudioTrackTask.class.getSimpleName();
+
+    private static AudioDeviceInfo mPreferredDevice = null;
+    private static boolean mCycling = false;
+
     private ITackUiCallback mCallback;
     private volatile boolean mRunning = false;
-    private static boolean mCycling = false;
 
     public static final class Parameters {
         public boolean isSample;
@@ -86,8 +90,11 @@ public class AudioTrackTask extends AsyncTask<AudioTrackTask.Parameters, Integer
                 mCallback.onCreate(audioTrack);
             }
 
-            InputStream inputStream = getPlayFile(para.isSample, para.fileName);
+            if (mPreferredDevice != null) {
+                audioTrack.setPreferredDevice(mPreferredDevice);
+            }
             audioTrack.play();
+            InputStream inputStream = getPlayFile(para.isSample, para.fileName);
             int bytesPer10ms = 2 * para.channels * (para.sampleRate * 10 / 1000);
             startFilePlay(inputStream, audioTrack, bytesPer10ms);
 
@@ -177,5 +184,9 @@ public class AudioTrackTask extends AsyncTask<AudioTrackTask.Parameters, Integer
 
     public static void setCyclingOn(boolean cycling) {
         mCycling = cycling;
+    }
+
+    public static void setPreferredDevice(AudioDeviceInfo info) {
+        mPreferredDevice = info;
     }
 }

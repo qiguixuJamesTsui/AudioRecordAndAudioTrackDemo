@@ -1,5 +1,6 @@
 package james.tsui.audio.task;
 
+import android.media.AudioDeviceInfo;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
@@ -12,6 +13,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 import james.tsui.audio.utils.ContextUtils;
+import james.tsui.audio.utils.Variables;
 
 public class AudioRecordTask extends AsyncTask<AudioRecordTask.Parameters, Integer, Long> {
     private static final String TAG = AudioRecordTask.class.getSimpleName();
@@ -19,6 +21,8 @@ public class AudioRecordTask extends AsyncTask<AudioRecordTask.Parameters, Integ
     // @RequiresPermission(android.Manifest.permission.CAPTURE_AUDIO_OUTPUT)
     private static final int SUBMIX = MediaRecorder.AudioSource.REMOTE_SUBMIX;
     private static final int READ_PERIOD = 10; // milliSecond
+
+    private static AudioDeviceInfo mPreferredDevice = null;
 
     private IRecordUiCallback mCallback;
     private volatile boolean mRunning = false;
@@ -30,7 +34,7 @@ public class AudioRecordTask extends AsyncTask<AudioRecordTask.Parameters, Integ
         public int encoding = AudioFormat.ENCODING_PCM_16BIT;
 
         public boolean isCapture = false;
-        public String fileName = ContextUtils.getNowDay("yyyy-MM-dd HH:mm:ss") + "record.pcm";
+        public String fileName = Variables.getInstance().getNowDay(null) + "record.pcm";
     }
 
     public interface IRecordUiCallback extends IUiCallback{
@@ -55,9 +59,12 @@ public class AudioRecordTask extends AsyncTask<AudioRecordTask.Parameters, Integ
                 mCallback.onCreate(audioRecord);
             }
 
+            if (mPreferredDevice != null) {
+                audioRecord.setPreferredDevice(mPreferredDevice);
+            }
             audioRecord.startRecording();
             FileOutputStream recordFile = getRecordFile(param.fileName);
-            ContextUtils.initRecord(param.fileName, param.sampleRate);
+            Variables.getInstance().initRecord(param.fileName, param.sampleRate);
             int bytesPer10ms = getBytesReadInPerPeriod(param.sampleRate, param.channels);
             startRecord2File(recordFile, audioRecord, bytesPer10ms);
 
@@ -147,5 +154,9 @@ public class AudioRecordTask extends AsyncTask<AudioRecordTask.Parameters, Integ
 
     public void stop() {
         mRunning = false;
+    }
+
+    public static void setPreferredDevice(AudioDeviceInfo info) {
+        mPreferredDevice = info;
     }
 }

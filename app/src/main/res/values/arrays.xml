@@ -43,6 +43,7 @@
 
     <string-array name="audio_mode_entries">
         <item>MODE_NORMAL</item>
+        <item>MODE_RINGTONE</item>
         <item>MODE_IN_CALL</item>
         <item>MODE_IN_COMMUNICATION</item>
     </string-array>

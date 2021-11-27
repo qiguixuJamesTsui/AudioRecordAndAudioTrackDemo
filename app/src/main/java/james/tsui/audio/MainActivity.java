@@ -9,7 +9,6 @@ import android.media.AudioTrack;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.PowerManager;
 import android.support.annotation.ArrayRes;
 import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
@@ -25,14 +24,16 @@ import android.widget.Toast;
 
 import java.util.List;
 
+import james.tsui.audio.task.AudioDeviceManager;
 import james.tsui.audio.task.AudioRecordTask;
 import james.tsui.audio.task.AudioTrackTask;
 import james.tsui.audio.utils.Constants;
 import james.tsui.audio.utils.ContextUtils;
+import james.tsui.audio.utils.Variables;
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
-public class MainActivity extends AppCompatActivity implements EasyPermissions.PermissionCallbacks ,
+public class MainActivity extends AppCompatActivity implements EasyPermissions.PermissionCallbacks,
         View.OnClickListener {
     private static final String TAG = MainActivity.class.getSimpleName();
 
@@ -45,14 +46,14 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
 
     private Button btn_rec_capture = null;
     private Button btn_rec_start = null;
-    private Button btn_rec_stop = null;
+    private Button btn_rec_dev = null;
     private Button btn_play_sample = null;
     private Button btn_play_usage = null;
     private Button btn_play_cycle = null;
     private Button btn_play_start = null;
-    private Button btn_play_stop = null;
-    private Button btn_set_mode = null;
+    private Button btn_play_dev = null;
     private Button btn_speaker = null;
+    private Button btn_sco = null;
 
     private Spinner spn_rec_source = null;
     private Spinner spn_rec_rate = null;
@@ -63,13 +64,13 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
     private Spinner spn_play_usage = null;
     private Spinner spn_play_content = null;
     private Spinner spn_audio_mode = null;
+    private Spinner spn_device_available = null;
 
     private TextView tv_audio_state = null;
-    private TextView tv_device_info = null;
+    private ArrayAdapter<CharSequence> mDeviceAdapter;
 
     private Context mContext = null;
 
-    private AudioManager mAudioManager = null;
     private AudioRecordTask mAudioRecordTask;
     private AudioTrackTask mAudioTrackTask;
 
@@ -82,15 +83,13 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         mContext = this.getApplicationContext();
         ContextUtils.init(this.getApplication());
-        mAudioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
+        EasyPermissions.requestPermissions(this, "please", REQUEST_PERMISSION, PERMISSIONS);
 
         tv_audio_state = (TextView) findViewById(R.id.tv_audio_state);
-        tv_device_info = (TextView) findViewById(R.id.tv_device_info);
         String deviceInfo = "Android SDK: " + Build.VERSION.SDK_INT + ", "
                 + "Release: " + Build.VERSION.RELEASE + ", "
                 + "Brand: " + Build.BRAND + ", "
@@ -100,18 +99,22 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
                 + "Manufacturer: " + Build.MANUFACTURER + ", "
                 + "Model: " + Build.MODEL + ", "
                 + "Product: " + Build.PRODUCT;
-        tv_device_info.setText(deviceInfo);
+        ((TextView) findViewById(R.id.tv_device_info)).setText(deviceInfo);
 
         btn_rec_capture = getButtonWithClickListener(R.id.btn_rec_capture);
         btn_rec_start = getButtonWithClickListener(R.id.btn_rec_start);
-        btn_rec_stop = getButtonWithClickListener(R.id.btn_rec_stop);
+        btn_rec_dev = getButtonWithClickListener(R.id.btn_rec_dev);
         btn_play_sample = getButtonWithClickListener(R.id.btn_play_sample);
         btn_play_usage = getButtonWithClickListener(R.id.btn_play_usage);
         btn_play_cycle = getButtonWithClickListener(R.id.btn_play_cycle);
         btn_play_start = getButtonWithClickListener(R.id.btn_play_start);
-        btn_play_stop = getButtonWithClickListener(R.id.btn_play_stop);
-        btn_set_mode = getButtonWithClickListener(R.id.btn_set_mode);
+        btn_play_dev = getButtonWithClickListener(R.id.btn_play_dev);
+        Button btn_set_mode = getButtonWithClickListener(R.id.btn_set_mode);
         btn_speaker = getButtonWithClickListener(R.id.btn_speaker);
+        btn_sco = getButtonWithClickListener(R.id.btn_sco);
+        Button btn_update_dev = getButtonWithClickListener(R.id.btn_update_dev);
+
+        mDeviceAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item);
 
         spn_rec_source = getSimpleSpinner(R.id.spn_rec_source, R.array.rec_source_entries);
         spn_rec_rate = getSimpleSpinner(R.id.spn_rec_rate, R.array.audio_sample_entries);
@@ -122,8 +125,10 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
         spn_play_usage = getSimpleSpinner(R.id.spn_play_usage, R.array.play_usage_entries);
         spn_play_content = getSimpleSpinner(R.id.spn_play_content, R.array.play_content_entries);
         spn_audio_mode = getSimpleSpinner(R.id.spn_audio_mode, R.array.audio_mode_entries);
+        spn_device_available = getDropdownSpinner(R.id.spn_dev_available, mDeviceAdapter);
 
-        EasyPermissions.requestPermissions(this, "please", REQUEST_PERMISSION, PERMISSIONS);
+        AudioDeviceManager.getInstance().registerCallback(state -> tv_audio_state.setText(state));
+        AudioDeviceManager.getInstance().updateAvailableDevices(mDeviceAdapter);
     }
 
     private Button getButtonWithClickListener(@IdRes int id) {
@@ -142,6 +147,13 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
         return spn;
     }
 
+    private Spinner getDropdownSpinner(@IdRes int id, ArrayAdapter<CharSequence> adapter) {
+        Spinner spn = (Spinner) findViewById(id);
+        spn.setAdapter(adapter);
+        spn.setSelection(0);
+        return spn;
+    }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -155,7 +167,7 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
 
     @Override
     public void onPermissionsGranted(int requestCode, List<String> perms) {
-        Log.i(TAG, "onRequestPermissionsResult requestCode=" +requestCode
+        Log.i(TAG, "onRequestPermissionsResult requestCode=" + requestCode
                 + "permissions=" + perms.toString());
     }
 
@@ -191,15 +203,15 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
         @Override
         public void onPreExecute() {
             Log.i(TAG, "RecordTask.onPreExecute()");
-            btn_rec_start.setEnabled(false);
-            btn_rec_stop.setEnabled(true);
+            btn_rec_capture.setEnabled(false);
+            btn_rec_dev.setEnabled(false);
         }
 
         @Override
         public void onPostExecute(Long aLong) {
             Log.i(TAG, "RecordTask.onPostExecute()");
-            btn_rec_start.setEnabled(true);
-            btn_rec_stop.setEnabled(true);
+            btn_rec_capture.setEnabled(true);
+            btn_rec_dev.setEnabled(true);
         }
 
         @Override
@@ -245,19 +257,21 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
         @Override
         public void onPreExecute() {
             Log.i(TAG, "PlayTask.onPreExecute()");
-            btn_play_stop.setEnabled(true);
-            btn_play_start.setEnabled(false);
+            btn_play_dev.setEnabled(false);
+            btn_play_start.setEnabled(true);
             btn_play_sample.setEnabled(false);
             btn_play_usage.setEnabled(false);
+            btn_play_dev.setEnabled(false);
         }
 
         @Override
         public void onPostExecute(Long aLong) {
             Log.i(TAG, "PlayTask.onPostExecute()");
-            btn_play_stop.setEnabled(true);
+            btn_play_dev.setEnabled(true);
             btn_play_start.setEnabled(true);
             btn_play_sample.setEnabled(true);
             btn_play_usage.setEnabled(true);
+            btn_play_dev.setEnabled(true);
         }
 
         @Override
@@ -275,6 +289,17 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
         }
     };
 
+    private void switchAudioTrackTask() {
+        btn_play_start.setText("播放" + (mAudioTrackTask == null ? "关" : "开"));
+        if (mAudioTrackTask == null) {
+            startAudioTrackTask();
+        } else {
+            mAudioTrackTask.stop();
+            setAudioTrackPreferredDevice(null);
+            mAudioTrackTask = null;
+        }
+    }
+
     private void startAudioTrackTask() {
         mAudioTrackTask = new AudioTrackTask();
         mAudioTrackTask.registerCallback(mTrackUiCallback);
@@ -286,8 +311,8 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
             para.sampleRate = Integer.parseInt(spn_play_rate.getSelectedItem().toString());
             para.fileName = Constants.getPlayFileName(para.sampleRate);
         } else {
-            para.sampleRate = ContextUtils.getRecordSampleRate();
-            para.fileName = ContextUtils.getRecordName();
+            para.sampleRate = Variables.getInstance().getRecordSampleRate();
+            para.fileName = Variables.getInstance().getRecordName();
             if (para.fileName == null) {
                 return;
             }
@@ -297,28 +322,34 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
             para.content = Constants.getContentInt(spn_play_content.getSelectedItem().toString());
         } else {
             para.streamType = Constants.getStreamInt(spn_play_stream.getSelectedItem().toString());
+            setVolumeControlStream(para.streamType);
         }
         para.channels = Constants.getChannelOutInt(spn_play_channel.getSelectedItem().toString());
 
         mAudioTrackTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, para);
     }
 
-    private void setMode() {
-        int defmode = mAudioManager.getMode();
-        int mode = Constants.getModeInt(spn_audio_mode.getSelectedItem().toString());
-
-        mAudioManager.setMode(mode);
-        if (mAudioManager.getMode() != mode) {
-            tv_audio_state.setText("模式设置失败, 可能不支持此模式.");
-            mAudioManager.setMode(defmode);
-        } else {
-            tv_audio_state.setText("模式设置成功.");
-        }
+    private void setAudioTrackPreferredDevice(String dev) {
+        btn_play_dev.setText("偏好:" + dev);
+        AudioTrackTask.setPreferredDevice(dev == null ? null :
+                AudioDeviceManager.getInstance().getSelectedAudioDeviceInfoBySpinner(dev));
     }
 
-    private void setSpeakerphoneOn() {
-        btn_speaker.setText("spk" + (mAudioManager.isSpeakerphoneOn() ? "开" : "关"));
-        mAudioManager.setSpeakerphoneOn(!mAudioManager.isSpeakerphoneOn());
+    private void setAudioRecordPreferredDevice(String dev) {
+        btn_rec_dev.setText("偏好:" + dev);
+        AudioRecordTask.setPreferredDevice(dev == null ? null :
+                AudioDeviceManager.getInstance().getSelectedAudioDeviceInfoBySpinner(dev));
+    }
+
+    private void switchAudioRecordTask() {
+        btn_rec_start.setText("录音" + (mAudioRecordTask == null ? "关" : "开"));
+        if (mAudioRecordTask == null) {
+            startAudioRecordTask();
+        } else {
+            stopAudioRecordTask();
+            setAudioRecordPreferredDevice(null);
+            mAudioRecordTask = null;
+        }
     }
 
     @Override
@@ -329,11 +360,11 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
                 break;
 
             case R.id.btn_rec_start:
-                startAudioRecordTask();
+                switchAudioRecordTask();
                 break;
 
-            case R.id.btn_rec_stop:
-                stopAudioRecordTask();
+            case R.id.btn_rec_dev:
+                setAudioRecordPreferredDevice(spn_device_available.getSelectedItem().toString());
                 break;
 
             case R.id.btn_play_sample:
@@ -350,19 +381,27 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
 
 
             case R.id.btn_play_start:
-                startAudioTrackTask();
+                switchAudioTrackTask();
                 break;
 
-            case R.id.btn_play_stop:
-                mAudioTrackTask.stop();
+            case R.id.btn_play_dev:
+                setAudioTrackPreferredDevice(spn_device_available.getSelectedItem().toString());
                 break;
 
             case R.id.btn_set_mode:
-                setMode();
+                AudioDeviceManager.getInstance().setMode(spn_audio_mode);
                 break;
 
             case R.id.btn_speaker:
-                setSpeakerphoneOn();
+                AudioDeviceManager.getInstance().setSpeakerphoneOn(btn_speaker);
+                break;
+
+            case R.id.btn_sco:
+                AudioDeviceManager.getInstance().setBluetoothScoOn(btn_sco);
+                break;
+
+            case R.id.btn_update_dev:
+                AudioDeviceManager.getInstance().updateAvailableDevices(mDeviceAdapter);
                 break;
         }
     }

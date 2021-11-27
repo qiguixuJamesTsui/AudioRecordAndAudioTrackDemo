@@ -11,9 +11,6 @@ public class ContextUtils {
     private static final String TAG = ContextUtils.class.getSimpleName();
     private static Application mApplication;
 
-    private static String mRecordName;
-    private static int mRecordSampleRate;
-
     public static void init(Application application) {
         if (mApplication == null) {
             mApplication = application;
@@ -24,23 +21,5 @@ public class ContextUtils {
 
     public static Context getContext() {
         return mApplication;
-    }
-
-    @SuppressLint("SimpleDateFormat")
-    public static String getNowDay(String format){
-        return new SimpleDateFormat(format).format(new Date());
-    }
-
-    public static void initRecord(String name, int sampleRate) {
-        mRecordName = name;
-        mRecordSampleRate = sampleRate;
-    }
-
-    public static String getRecordName() {
-        return mRecordName;
-    }
-
-    public static int getRecordSampleRate() {
-        return mRecordSampleRate;
     }
 }
