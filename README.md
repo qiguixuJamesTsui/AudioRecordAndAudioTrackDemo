@@ -1,3 +1,4 @@
-# AudioRecordDemo
-Android AudioRecord and AudioTrack test demo    
-![](https://github.com/vintonliu/AudioRecordDemo/blob/master/app/src/main/assets/device-2017-11-20-094604.png)
+# AudioRecord and AudioTrack Demo
+Test for AudioRecord, AudioTrack, AudioManager, AudioMode, AudioDeviceInfo, and so on.
+
+![](https://github.com/qiguixuJamesTsui/AndroidMedia/blob/master/window.jpg)
