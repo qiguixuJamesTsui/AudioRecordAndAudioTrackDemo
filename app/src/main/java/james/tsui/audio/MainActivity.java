@@ -3,7 +3,6 @@ package james.tsui.audio;
 import android.Manifest;
 import android.content.Context;
 import android.media.AudioFormat;
-import android.media.AudioManager;
 import android.media.AudioRecord;
 import android.media.AudioTrack;
 import android.os.AsyncTask;
@@ -75,7 +74,7 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
     private AudioTrackTask mAudioTrackTask;
 
     private boolean mIsCapture = false;
-    private boolean mIsSample = false;
+    private boolean mIsSample = true;
     private boolean mIsUsage = false;
     private boolean mIsCycling = false;
 
@@ -259,6 +258,7 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
             Log.i(TAG, "PlayTask.onPreExecute()");
             btn_play_dev.setEnabled(false);
             btn_play_start.setEnabled(true);
+            btn_play_start.setText("播放关");
             btn_play_sample.setEnabled(false);
             btn_play_usage.setEnabled(false);
             btn_play_dev.setEnabled(false);
@@ -269,6 +269,7 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
             Log.i(TAG, "PlayTask.onPostExecute()");
             btn_play_dev.setEnabled(true);
             btn_play_start.setEnabled(true);
+            btn_play_start.setText("播放开");
             btn_play_sample.setEnabled(true);
             btn_play_usage.setEnabled(true);
             btn_play_dev.setEnabled(true);
