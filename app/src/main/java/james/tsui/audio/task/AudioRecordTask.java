@@ -35,9 +35,11 @@ public class AudioRecordTask extends AsyncTask<AudioRecordTask.Parameters, Integ
 
         public boolean isCapture = false;
         public String fileName = Variables.getInstance().getNowDay(null) + "record.pcm";
+
+        public DataWaveDrawer dataWaveDrawer = null;
     }
 
-    public interface IRecordUiCallback extends IUiCallback{
+    public interface IRecordUiCallback extends IUiCallback {
         void onCreate(final AudioRecord record);
     }
 
@@ -66,10 +68,13 @@ public class AudioRecordTask extends AsyncTask<AudioRecordTask.Parameters, Integ
             FileOutputStream recordFile = getRecordFile(param.fileName);
             Variables.getInstance().initRecord(param.fileName, param.sampleRate);
             int bytesPer10ms = getBytesReadInPerPeriod(param.sampleRate, param.channels);
-            startRecord2File(recordFile, audioRecord, bytesPer10ms);
+            startRecord2File(recordFile, audioRecord, bytesPer10ms, param.dataWaveDrawer);
 
             audioRecord.stop();
             audioRecord.release();
+            if (param.dataWaveDrawer != null) {
+                param.dataWaveDrawer.clearWave();
+            }
             if (recordFile != null) {
                 recordFile.close();
             }
@@ -138,13 +143,17 @@ public class AudioRecordTask extends AsyncTask<AudioRecordTask.Parameters, Integ
         return null;
     }
 
-    private void startRecord2File(FileOutputStream file, @NonNull AudioRecord record, int bytesPerRead) throws IOException {
+    private void startRecord2File(FileOutputStream file, @NonNull AudioRecord record, int bytesPerRead, DataWaveDrawer dataWaveDrawer) throws IOException {
         int bytesRead;
         byte[] tempBuf = new byte[bytesPerRead];
 
         mRunning = true;
         while (mRunning) {
             bytesRead = record.read(tempBuf, 0, bytesPerRead);
+
+            if (dataWaveDrawer != null) {
+                dataWaveDrawer.draw(tempBuf);
+            }
 
             if (file != null && bytesRead == bytesPerRead) {
                 file.write(tempBuf, 0, bytesRead);

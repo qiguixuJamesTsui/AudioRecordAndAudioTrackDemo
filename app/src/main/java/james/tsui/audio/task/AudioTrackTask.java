@@ -189,4 +189,40 @@ public class AudioTrackTask extends AsyncTask<AudioTrackTask.Parameters, Integer
     public static void setPreferredDevice(AudioDeviceInfo info) {
         mPreferredDevice = info;
     }
+
+    public int StrToInt(String str) {
+        if (str == null || str.length() == 0) {
+            return 0;
+        }
+        int len = str.length();
+        boolean neg = false;
+        long res = 0L;
+        int i = 0;
+        char[] s = str.toCharArray();
+        while (s[i] == ' ') {
+            i++;
+        }
+        if (s[i] == '-') {
+            neg = true;
+        }
+        if (s[i] == '-' || s[i] == '+') {
+            i++;
+        }
+        while (i < len && s[i] >= '0' && s[i] <= '9') {
+            res = (res << 1) + (res << 3) + (s[i++] & 0xf);
+            if (neg && res > Integer.MAX_VALUE + 1L) {
+                return 0;
+            }
+            if (!neg && res > Integer.MAX_VALUE) {
+                return 0;
+            }
+        }
+        while (i < len && s[i] == ' ') {
+            i++;
+        }
+        if (i < len) {
+            return 0;
+        }
+        return (int) (neg ? -res : res);
+    }
 }

@@ -17,6 +17,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -26,6 +27,7 @@ import java.util.List;
 import james.tsui.audio.task.AudioDeviceManager;
 import james.tsui.audio.task.AudioRecordTask;
 import james.tsui.audio.task.AudioTrackTask;
+import james.tsui.audio.task.DataWaveDrawer;
 import james.tsui.audio.utils.Constants;
 import james.tsui.audio.utils.ContextUtils;
 import james.tsui.audio.utils.Variables;
@@ -65,6 +67,7 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
     private Spinner spn_audio_mode = null;
     private Spinner spn_device_available = null;
 
+    private ImageView mRecordView = null;
     private TextView tv_audio_state = null;
     private ArrayAdapter<CharSequence> mDeviceAdapter;
 
@@ -108,11 +111,12 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
         btn_play_cycle = getButtonWithClickListener(R.id.btn_play_cycle);
         btn_play_start = getButtonWithClickListener(R.id.btn_play_start);
         btn_play_dev = getButtonWithClickListener(R.id.btn_play_dev);
-        Button btn_set_mode = getButtonWithClickListener(R.id.btn_set_mode);
         btn_speaker = getButtonWithClickListener(R.id.btn_speaker);
         btn_sco = getButtonWithClickListener(R.id.btn_sco);
-        Button btn_update_dev = getButtonWithClickListener(R.id.btn_update_dev);
+        getButtonWithClickListener(R.id.btn_set_mode);
+        getButtonWithClickListener(R.id.btn_update_dev);
 
+        mRecordView = (ImageView) findViewById(R.id.img_rec_wave);
         mDeviceAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item);
 
         spn_rec_source = getSimpleSpinner(R.id.spn_rec_source, R.array.rec_source_entries);
@@ -228,6 +232,7 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
         para.channels = Constants.getChannelInInt(spn_rec_channel.getSelectedItem().toString());
         para.sampleRate = Integer.parseInt(spn_rec_rate.getSelectedItem().toString());
         para.encoding = AudioFormat.ENCODING_PCM_16BIT;
+        para.dataWaveDrawer = new DataWaveDrawer(mRecordView, mRecordView.getWidth());
 
         mAudioRecordTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, para);
     }

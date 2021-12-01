@@ -1,4 +1,5 @@
 apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
 
 android {
     compileSdkVersion 29
@@ -50,6 +51,10 @@ dependencies {
     implementation 'org.jetbrains:annotations:15.0'
     implementation 'pub.devrel:easypermissions:2.0.1'
     testImplementation 'junit:junit:4.12'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+}
+repositories {
+    mavenCentral()
 }
 
 def setSigningProperties() {

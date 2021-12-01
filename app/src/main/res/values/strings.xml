@@ -2,7 +2,7 @@
     <string name="app_name">Audio@JT</string>
     <string name="record_title">录音测试</string>
     <string name="play_title">播放测试</string>
-    <string name="speaker_title">扬声器测试</string>
+    <string name="device_title">设备测试</string>
     <string name="rec_source">采集源:</string>
     <string name="audio_rate">采样率:</string>
     <string name="audio_channel">通道数:</string>
@@ -23,4 +23,5 @@
     <string name="set_speaker_on"> spk </string>
     <string name="set_sco_on"> sco </string>
     <string name="btn_update_dev">设备刷新</string>
+    <string name="img_rec_wave">录音波形</string>
 </resources>
